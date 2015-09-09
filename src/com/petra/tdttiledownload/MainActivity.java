@@ -1,6 +1,8 @@
 package com.petra.tdttiledownload;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,31 +75,38 @@ public class MainActivity extends Activity {
 								+ String.format("{%s, %s, %s, %s}",
 										boundArray[0], boundArray[1],
 										boundArray[2], boundArray[3]));
-				double xMin = Double.parseDouble(boundArray[0]);
-				double xMax = Double.parseDouble(boundArray[2]);
-				double yMin = Double.parseDouble(boundArray[1]);
-				double yMax = Double.parseDouble(boundArray[3]);
+				double left = Double.parseDouble(boundArray[0]);
+				double bottom = Double.parseDouble(boundArray[1]);
+				double right = Double.parseDouble(boundArray[2]);
+				double top = Double.parseDouble(boundArray[3]);
 				Log.v(LOG_TAG, String.format("bound double = {%f,%f,%f,%f}",
-						xMin, yMin, xMax, yMax));
+						left, bottom, right, top));
 
-				double[] tlMercator = TileUtils.lonLat2Mercator(xMin, yMin);
-				double[] trMercator = TileUtils.lonLat2Mercator(xMax, yMin);
-				double[] blMercator = TileUtils.lonLat2Mercator(xMin, yMax);
-				double[] brMercator = TileUtils.lonLat2Mercator(xMax, yMax);
-				Log.v(LOG_TAG, String.format(
-						"bound mercator = {%f,%f},{%f,%f},{%f,%f},{%f,%f}",
-						tlMercator[0], tlMercator[1], trMercator[0],
-						trMercator[1], blMercator[0], blMercator[1],
-						brMercator[0], brMercator[1]));
+				// 存放每一级影像的四个角的瓦片号，左（最小列號）、上（是小行号）、右（最大列号）、下（最大行号）
+				Map<Integer, int[]> tileMap = new HashMap<Integer, int[]>();
+				long tileCount = 0;
+				for (int i = 5; i < 19; i++) {
+					int[] tileBound = new int[] {
+							TileUtils.getColumeNumBy84(left, i),
+							TileUtils.getRowNumBy84(top, i),
+							TileUtils.getColumeNumBy84(right, i),
+							TileUtils.getRowNumBy84(bottom, i), };
+					tileMap.put(i, tileBound);
+					int tileXCount = tileBound[2] - tileBound[0];
+					int tileYCount = tileBound[3] - tileBound[1];
+					int currLevelCount = (0 == tileXCount ? 1 : tileXCount + 1)
+							* (0 == tileYCount ? 1 : tileYCount + 1);
+					tileCount += currLevelCount;
 
-				int[] tlRcNum = TileUtils.getRowAndColume(tlMercator, 15);
-				int[] trRcNum = TileUtils.getRowAndColume(trMercator, 15);
-				int[] blRcNum = TileUtils.getRowAndColume(blMercator, 15);
-				int[] brRcNum = TileUtils.getRowAndColume(brMercator, 15);
-				Log.v(LOG_TAG, String.format(
-						"bound mercator = {%d,%d},{%d,%d},{%d,%d},{%d,%d}",
-						tlRcNum[0], tlRcNum[1], trRcNum[0], trRcNum[1],
-						blRcNum[0], blRcNum[1], brRcNum[0], brRcNum[1]));
+					Log.v(LOG_TAG,
+							String.format(
+									"level = %d, tileBound = {%d, %d, %d, %d },currLevelCount = %d, tileCount = %d",
+									i, tileBound[0], tileBound[1],
+									tileBound[2], tileBound[3], currLevelCount,
+									tileCount));
+				}
+				// 需要分别下载影像瓦片和矢量瓦片
+				tileCount *= 2;
 
 			} catch (HttpException e) {
 				e.printStackTrace();

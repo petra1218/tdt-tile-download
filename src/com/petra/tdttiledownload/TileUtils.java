@@ -21,26 +21,39 @@ public class TileUtils {
 	// 墨卡托原点（-20037508.3427892， 20037508.3427892）
 	static double[] origin = { -20037508.3427892, 20037508.3427892 };
 
-	// 计算瓦片的行列号，返回下载瓦片的行列号
-	static public int[] getRowAndColume(double[] xy, int level) {
-		// '输入墨卡托坐标x，y，和需要计算的级别，返回包含当前坐标的瓦片的行列号'
-		double currResolution = baseResolution / Math.pow(2, level);
-		double meterPerTile = currResolution * pixelPerTile;
-		int colume = (int) Math.ceil((xy[0] - origin[0]) / meterPerTile);
-		int row = (int) Math.ceil((origin[1] - xy[1]) / meterPerTile);
-		return new int[] { row, colume };
+	// 计算瓦片的列号, 传入WGS84的经度
+	static public int getColumeNumBy84(double x, int level) {
+		double meterPerTile = getMeterPerTile(level);
+		return (int) Math.ceil((lon2Mercator(x) - origin[0]) / meterPerTile);
 	}
 
-	private static String makeTileUrl(int level, double colume, double row) {
+	// 计算瓦片的行号, 传入WGS84的纬度
+	static public int getRowNumBy84(double y, int level) {
+		double meterPerTile = getMeterPerTile(level);
+		return (int) Math.ceil((origin[1] - lat2Mercator(y)) / meterPerTile);
+	}
+
+	private static double getMeterPerTile(int level) {
+		double currResolution = baseResolution / Math.pow(2, level);
+		double meterPerTile = currResolution * pixelPerTile;
+		return meterPerTile;
+	}
+
+	private static String makeTileUrl(int level, int colume, int row) {
 		String tilename = String.format(baseImgName, colume, row, level);
 		return String.format(URL, String.format(baseTilePath, level, tilename));
 	}
 
-	static public double[] lonLat2Mercator(double lon, double lat) {
-		double x = lon * 20037508.342789 / 180;
+	// WSG84经度转Mercator横坐标
+	static double lon2Mercator(double lon) {
+		return lon * 20037508.342789 / 180;
+	}
+
+	// WSG84纬度转Mercator纵坐标
+	static double lat2Mercator(double lat) {
 		double y = Math.log(Math.tan((90 + lat) * Math.PI / 360))
 				/ (Math.PI / 180);
 		y *= 20037508.34789 / 180;
-		return new double[] { x, y };
+		return y;
 	}
 }
