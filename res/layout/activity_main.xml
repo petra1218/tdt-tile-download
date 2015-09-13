@@ -5,9 +5,26 @@
     tools:context="${relativePackage}.${activityClass}" >
 
     <TextView
+        android:id="@+id/tv_hint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:text="输入区（县）名，开始下载。" />
+
+    <TextView
+        android:id="@+id/tv_region_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/et_region_name"
+        android:layout_toLeftOf="@+id/et_region_name"
+        android:text="区（县）名：" />
+
+    <EditText
+        android:id="@+id/et_region_name"
+        android:layout_width="200dp"
+        android:layout_height="60dp"
+        android:layout_below="@id/tv_hint"
+        android:layout_centerHorizontal="true"
+        android:text="石景山区" />
 
     <Button
         android:id="@+id/start_download"
@@ -16,5 +33,47 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:text="StartDownload" />
+
+    <EditText
+        android:id="@+id/et_start_level"
+        android:layout_width="95dp"
+        android:layout_height="60dp"
+        android:layout_alignLeft="@id/et_region_name"
+        android:layout_below="@+id/tv_region_name"
+        android:text="5" />
+
+    <EditText
+        android:id="@+id/et_end_level"
+        android:layout_width="95dp"
+        android:layout_height="60dp"
+        android:layout_alignBottom="@id/et_start_level"
+        android:layout_toRightOf="@id/et_start_level"
+        android:text="18" />
+
+    <TextView
+        android:id="@+id/tv_tile_level"
+        android:layout_width="95dp"
+        android:layout_height="60dp"
+        android:layout_alignBottom="@+id/et_start_level"
+        android:layout_toLeftOf="@id/et_start_level"
+        android:gravity="bottom"
+        android:text="下载瓦片级别：" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/et_start_level" />
+
+    <TextView
+        android:id="@+id/progressText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/progressBar"
+        android:layout_centerHorizontal="true"
+        android:gravity="center_horizontal" />
 
 </RelativeLayout>

@@ -7,7 +7,7 @@ public class TileUtils {
     static String ciaURL = "http://t1.tianditu.cn/DataServer?T=cia_w&X=%d&Y=%d&l=%d";
     // URL = "http://t1.tianditu.cn/DataServer?T=img_w&X=843&Y=388&l=10"
 
-    static String baseDir = "/sdcard/zmn/cache/%d";
+    static String baseDir = "/sdcard/tdt_test/cacheMap/%d";
     static String imgFilePath = "/sdcard/zmn/cache/%d/img_w&X=%d&Y=%d&z=%d.map";
     static String ciaFilePath = "/sdcard/zmn/cache/%d/cia_w&X=%d&Y=%d&z=%d.map";
 
@@ -45,21 +45,21 @@ public class TileUtils {
         return meterPerTile;
     }
 
-    public static String makeImgUrl(int level, long colume, long row) {
+    public static String makeImgUrl(long level, long colume, long row) {
         return String.format(imgURL, colume, row, level);
 
     }
 
-    public static String makeCiaUrl(int level, long colume, long row) {
+    public static String makeCiaUrl(long level, long colume, long row) {
         return String.format(ciaURL, colume, row, level);
     }
 
-    public static String makeImgFile(int level, long colume, long row)
+    public static String makeImgFile(long level, long colume, long row)
     {
         return String.format(imgFilePath, level, colume, row, level);
     }
 
-    public static String makeCiaFile(int level, long colume, long row)
+    public static String makeCiaFile(long level, long colume, long row)
     {
         return String.format(ciaFilePath, level, colume, row, level);
     }
