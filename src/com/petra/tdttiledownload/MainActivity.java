@@ -2,6 +2,7 @@
 package com.petra.tdttiledownload;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -23,7 +24,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -34,8 +37,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+//石景山16842张瓦片 12个线程，4分5秒
+
 public class MainActivity extends Activity {
     public static final int UPDATE_PROGRESS = 0;
+    public static final int DOWNLOAD_SUCCESS = UPDATE_PROGRESS + 1;
 
     private static final long EXECUTOR_WAIT_TIME = 30;// 秒
     String LOG_TAG = MainActivity.class.getSimpleName();
@@ -94,13 +100,16 @@ public class MainActivity extends Activity {
                                     executor.getCorePoolSize(), executor.getActiveCount(),
                                     executor.getQueue().size(), tileCounter, durationM, durationS);
                     progressText.setText(progressStr);
-                    int currProgress = (int) ((tileCounter * 1.0) / totalTileCount) / 100;
+                    int currProgress = (int) (((tileCounter * 1.0) / totalTileCount) * 100);
+                    Log.v(LOG_TAG, "progress = " + currProgress);
                     progress.setProgress(currProgress);
                     break;
+                case DOWNLOAD_SUCCESS:
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("下载完成").setMessage((String) msg.obj).show();
+                    break;
             }
-            // AlertDialog.Builder builder = new
-            // AlertDialog.Builder(MainActivity.this);
-            // builder.setTitle("下载完成").setMessage((String) msg.obj).show();
+
             super.handleMessage(msg);
         }
     };
@@ -264,15 +273,25 @@ public class MainActivity extends Activity {
                     }
                 }
 
+                List<SubDownload> listThread = new ArrayList<SubDownload>();
+
                 for (int i = 0; i < coreCount * 3; i++)
                 {
-                    new SubDownload().start();
+                    SubDownload subDownload = new SubDownload();
+                    subDownload.start();
+                    listThread.add(subDownload);
                 }
 
                 while (!tileQueue.isEmpty())
                 {
                     Thread.yield();
                 }
+
+                for (SubDownload subDownload : listThread)
+                {
+                    subDownload.join();
+                }
+
                 long totalEnd = System.currentTimeMillis();
                 long duration = (totalEnd - totalStart) / 1000;
                 long durationM = duration / 60;
@@ -280,12 +299,14 @@ public class MainActivity extends Activity {
                 String msgStr = String.format("%s的瓦片下载已经完成,从%d级到%d级，共下载瓦片%d张，下载耗时%d分%d秒",
                         regionName, startLevel, endLevel, totalTileCount * 2,
                         durationM, durationS);
-                Message.obtain(handler, 0, msgStr).sendToTarget();
+                Message.obtain(handler, DOWNLOAD_SUCCESS, msgStr).sendToTarget();
             } catch (HttpException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             super.run();

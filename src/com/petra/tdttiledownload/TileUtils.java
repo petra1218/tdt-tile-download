@@ -7,9 +7,9 @@ public class TileUtils {
     static String ciaURL = "http://t1.tianditu.cn/DataServer?T=cia_w&X=%d&Y=%d&l=%d";
     // URL = "http://t1.tianditu.cn/DataServer?T=img_w&X=843&Y=388&l=10"
 
-    static String baseDir = "/sdcard/tdt_test/cacheMap/%d";
-    static String imgFilePath = "/sdcard/zmn/cache/%d/img_w&X=%d&Y=%d&z=%d.map";
-    static String ciaFilePath = "/sdcard/zmn/cache/%d/cia_w&X=%d&Y=%d&z=%d.map";
+    static String baseDir = "/sdcard/zmn/cache/%d";
+    static String imgFilePath = baseDir + "/img_w&X=%d&Y=%d&z=%d.map";
+    static String ciaFilePath = baseDir + "/cia_w&X=%d&Y=%d&z=%d.map";
 
     // 每张瓦片的像素
     static int pixelPerTile = 256;
