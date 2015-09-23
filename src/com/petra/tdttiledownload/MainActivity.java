@@ -287,9 +287,11 @@ public class MainActivity extends Activity {
                     Thread.yield();
                 }
 
+                int subCount = 0;
                 for (SubDownload subDownload : listThread)
                 {
                     subDownload.join();
+                    Log.v(LOG_TAG, "join SubDownload count = " + ++subCount);
                 }
 
                 long totalEnd = System.currentTimeMillis();
