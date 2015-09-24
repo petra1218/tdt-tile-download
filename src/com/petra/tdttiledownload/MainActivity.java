@@ -383,13 +383,15 @@ public class MainActivity extends Activity {
                         {
                             break;
                         }
-                        Log.v(LOG_TAG, "imgFile = " + imgFile.getPath());
-                        outPut = new FileOutputStream(imgFile);
-                        Log.v(LOG_TAG, "imgFile = " + imgFile.getPath());
                         responseStream = httpUtils.sendSync(HttpMethod.GET, imgUrl);
+                        if (0 == responseStream.getContentLength())
+                        {
+                            break;
+                        }
                         input = responseStream.getBaseStream();
                         readSize = 0;
                         fileLength = 0;
+                        outPut = new FileOutputStream(imgFile);
 
                         while ((readSize = input.read(fileCache, 0, CACHE_SIZE)) > 0)
                         {// 设置的缓存不够大了
@@ -397,9 +399,9 @@ public class MainActivity extends Activity {
                             fileLength += readSize;
                         }
 
-                        Log.v(LOG_TAG, String.format(
-                                "imgFile Entity length = %d write Length = %d",
-                                responseStream.getContentLength(), fileLength));
+                        Log.v(LOG_TAG,
+                                String.format("imgFile Entity length = %d write Length = %d",
+                                        responseStream.getContentLength(), fileLength));
 
                         outPut.flush();
                         outPut.close();
@@ -415,14 +417,18 @@ public class MainActivity extends Activity {
                             break;
                         }
                         Log.v(LOG_TAG, "ciaFile = " + ciaFile.getPath());
-                        outPut = new FileOutputStream(ciaFile);
                         Log.v(LOG_TAG, "ciaFile = " + ciaFile.getPath());
 
                         responseStream = httpUtils.sendSync(HttpMethod.GET, ciaUrl);
+                        if (0 == responseStream.getContentLength())
+                        {
+                            break;
+                        }
                         input = responseStream.getBaseStream();
-
                         readSize = 0;
                         fileLength = 0;
+
+                        outPut = new FileOutputStream(ciaFile);
 
                         while ((readSize = input.read(fileCache, 0, CACHE_SIZE)) > 0)
                         {// 设置的缓存不够大了
