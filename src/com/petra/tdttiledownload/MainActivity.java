@@ -24,6 +24,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -122,12 +126,15 @@ public class MainActivity extends Activity {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.start_download:
-                regionName = etRegionName.getText().toString();
-                startLevel = Integer.parseInt(etStartLevel.getText().toString());
-                endLevel = Integer.parseInt(etEndLevel.getText().toString());
-                DownloadThread downloadThread = new DownloadThread();
-                downloadThread.start();
+                // regionName = etRegionName.getText().toString();
+                // startLevel =
+                // Integer.parseInt(etStartLevel.getText().toString());
+                // endLevel = Integer.parseInt(etEndLevel.getText().toString());
+                // DownloadThread downloadThread = new DownloadThread();
+                // downloadThread.start();
+                new Thread(downloadTest).start();
                 break;
+
         }
     }
 
@@ -465,4 +472,88 @@ public class MainActivity extends Activity {
             }
         }
     };
+
+    Runnable downloadTest = new Runnable() {
+
+        @Override
+        public void run() {
+            try {
+                File imgFile = new File(TileUtils.makeImgFile(10, 5, 5));
+                FileOutputStream outPut;
+                Charset charset = Charset.forName("UTF8");
+
+                SocketChannel channel = SocketChannel.open(new InetSocketAddress("t6.tianditu.cn",
+                        80));
+
+                String line = "GET /DataServer?T=img_w&x=215830&y=99328&l=18 HTTP/1.1 \r\n";
+                line += "HOST:t6.tianditu.cn\r\n";
+                line += "Connection: Keep-Alive\r\n";
+                line += "\r\n";
+                channel.write(charset.encode(line));
+                ByteBuffer buffer = ByteBuffer.allocate(1024 * 10);// 创建1024字节的缓冲
+                // int size = channel.read(buffer);
+
+                int readSize = 0;
+                int fileLength = 0;
+                int readBytes = 0;
+                StringBuilder sb = new StringBuilder();
+                long startTime = System.currentTimeMillis();
+                while ((readSize = channel.read(buffer)) != -1)
+                {// 设置的缓存不够大了
+                    buffer.flip();
+                    readBytes += readSize;
+                    sb.append(Charset.forName("UTF-8").decode(buffer).toString());
+                    buffer.clear();
+                }
+                long endTime = System.currentTimeMillis();
+                Log.v(LOG_TAG, "one img read from net time : " + (endTime - startTime));
+                String response = sb.toString();
+                if (!response.startsWith("HTTP/1.1 200 OK"))
+                {
+                    // continue;
+                }
+                if (-1 == response.indexOf("Content-Type: image/jpeg"))
+                {
+
+                }
+
+                int index = response.indexOf("\r\n\r\n");
+                if (-1 == index)
+                {
+
+                }
+
+                String header = response.substring(0, index);
+                String[] headerParams = header.split("\r\n");
+                long imgSize = 0;
+                for (String param : headerParams)
+                {
+                    if (!param.startsWith("Content-Length:"))
+                    {
+                        continue;
+                    }
+                    int i = param.indexOf(' ');
+                    String sizeStr = param.substring(i + 1);
+                    imgSize = Integer.parseInt(sizeStr);
+                }
+
+                if (imgSize <= 0)
+                {
+
+                }
+
+                String imgStr = response.substring(index + 4);
+                imgStr.getBytes();
+
+                outPut = new FileOutputStream(imgFile);
+                outPut.write(imgStr.getBytes());
+
+                outPut.flush();
+                outPut.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
 }
